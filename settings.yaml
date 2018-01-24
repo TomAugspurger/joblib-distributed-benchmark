@@ -1,0 +1,27 @@
+cluster:
+  num_nodes: 3
+  machine_type: n1-standard-8
+  disk_size: 50
+  zone: europe-west1-b
+  autoscaling: False
+  min_nodes: 2
+  max_nodes: 32
+jupyter:
+  memory: 4096Mi
+  cpus: 1
+  port: 8888
+  lab_port: 8889
+  image: tomaugspurger/distributed-joblib:latest
+scheduler:
+  memory: 4096Mi
+  cpus: 1
+  image: tomaugspurger/distributed-joblib:latest
+  tcp_port: 8786
+  http_port: 9786
+  bokeh_port: 8787
+workers:
+  count: 8
+  cpus_per_worker: 1.8
+  memory_per_worker: 6800Mi
+  mem_factor: 0.95
+  image: tomaugspurger/distributed-joblib:latest
