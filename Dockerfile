@@ -53,7 +53,8 @@ RUN conda install -c bokeh bokeh \
 
 # Optional: Install the master branch of distributed and dask
 RUN pip install git+https://github.com/dask/dask --upgrade --no-deps
-RUN pip install git+https://github.com/dask/distributed --upgrade --no-deps
+# RUN pip install git+https://github.com/dask/distributed --upgrade --no-deps
+RUN pip install git+https://github.com/TomAugspurger/distributed@distributed-joblib-nested
 
 # Install Tini that necessary to properly run the notebook service in docker
 # http://jupyter-notebook.readthedocs.org/en/latest/public_server.html#docker-cmd
