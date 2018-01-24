@@ -65,6 +65,7 @@ if __name__ == '__main__':
             'scheduler_host': SCHEDULER_ADDRESS,
             'scatter': [X_train, y_train],
         }),
+        ('loky', {}),
     ]
 
     n_jobs_grid = [1, -1]
