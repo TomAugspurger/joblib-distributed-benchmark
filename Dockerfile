@@ -55,6 +55,7 @@ RUN conda install -c bokeh bokeh \
 RUN pip install git+https://github.com/dask/dask --upgrade --no-deps
 # RUN pip install git+https://github.com/dask/distributed --upgrade --no-deps
 RUN pip install git+https://github.com/TomAugspurger/distributed@distributed-joblib-nested
+RUN pip install snappy
 
 # Install Tini that necessary to properly run the notebook service in docker
 # http://jupyter-notebook.readthedocs.org/en/latest/public_server.html#docker-cmd
