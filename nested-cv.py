@@ -68,7 +68,7 @@ if __name__ == '__main__':
         # ('loky', {}),
     ]
 
-    n_jobs_grid = [1, -1]
+    n_jobs_grid = [-1, 1]
 
     print("Dataset statistics:")
     print("===================")
