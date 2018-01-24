@@ -60,7 +60,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     BACKENDS = [
-        ('threading', {}),
+        # ('threading', {}),
         ('dask.distributed', {
             'scheduler_host': SCHEDULER_ADDRESS,
             'scatter': [X_train, y_train],
