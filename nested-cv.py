@@ -89,12 +89,12 @@ if __name__ == '__main__':
         for n_jobs_outer in n_jobs_grid:
             for n_jobs_inner in n_jobs_grid:
                 clf = RandomForestClassifier(random_state=RANDOM_STATE,
-                                             n_estimators=100)
+                                             n_estimators=20)
                 param_grid = {
                     'max_features': [5, 25, 54],
                     'min_samples_split': [2, 5, 10],
                 }
-                gs = GridSearchCV(clf, param_grid, cv=5, n_jobs=n_jobs_inner)
+                gs = GridSearchCV(clf, param_grid, cv=5, n_jobs=n_jobs_inner, verbose=1)
                 name = '%s,%s,%s' % (backend, n_jobs_outer, n_jobs_inner)
 
                 print("Training with {}...".format(name), end="")
