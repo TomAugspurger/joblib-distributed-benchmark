@@ -22,7 +22,7 @@ def parse_args(args=None):
                         help='Address for the scheduler like "tcp://...:8786"')
     parser.add_argument('-b', '--benchmark', choices=['basic', 'nested'])
     parser.add_argument('-n', '--classifier-n-jobs', type=int,
-                        help='Number of cores to use for the classifier (nested)')
+                        help='Number of cores to use for classifier (nested)')
 
     for backend in ['threading', 'dask', 'loky']:
         parser.add_argument(f'--{backend}', dest=backend, action='store_true')
@@ -63,15 +63,7 @@ def load_data():
     return X_train, X_test, y_train, y_test
 
 
-def basic(scheduler_address, backends):
-    ESTIMATORS = {
-        'RandomForest': RandomForestClassifier(n_estimators=100),
-        'ExtraTreesClassifier': ExtraTreesClassifier(n_estimators=100)
-    }
-
-    X_train, X_test, y_train, y_test = load_data()
-    BACKENDS = build_backends(backends, scheduler_address, X_train, y_train)
-
+def print_data(X_train, y_train, X_test, y_test):
     print("Dataset statistics:")
     print("===================")
     print("%s %d" % ("number of features:".ljust(25), X_train.shape[1]))
@@ -87,6 +79,19 @@ def basic(scheduler_address, backends):
              np.sum(y_test == 0), int(X_test.nbytes / 1e6)))
 
     print()
+
+
+def basic(scheduler_address, backends):
+    ESTIMATORS = {
+        'RandomForest': RandomForestClassifier(n_estimators=100),
+        'ExtraTreesClassifier': ExtraTreesClassifier(n_estimators=100)
+    }
+
+    X_train, X_test, y_train, y_test = load_data()
+    print_data(X_train, y_train, X_test, y_test)
+
+    BACKENDS = build_backends(backends, scheduler_address, X_train, y_train)
+
     print("Training Classifiers")
     print("====================")
     error, train_time, test_time = {}, {}, {}
@@ -139,13 +144,13 @@ def build_backends(backends, scheduler_host, X_train, y_train):
 
     while backends:
         backend = backends.pop()
-        if backend == 'threading':
-            BACKENDS.append(('threading', {}))
-        elif backend == 'dask.distributed':
+        if backend == 'dask.distributed':
             BACKENDS.append(('dask.distributed', {
                 'scheduler_host': scheduler_host,
                 'scatter': [X_train, y_train]
             }))
+        elif backend == 'threading':
+            BACKENDS.append(('threading', {}))
         elif backend == 'loky':
             BACKENDS.append(('loky', {}))
         else:
@@ -157,22 +162,10 @@ def build_backends(backends, scheduler_host, X_train, y_train):
 def nested(scheduler_address, backends,
            classifier_n_jobs=-1):
     X_train, X_test, y_train, y_test = load_data()
+    print_data(X_train, y_train, X_test, y_test)
+
     BACKENDS = build_backends(backends, scheduler_address, X_train, y_train)
     n_jobs_grid = [-1, 1]
-
-    print("Dataset statistics:")
-    print("===================")
-    print("%s %d" % ("number of features:".ljust(25), X_train.shape[1]))
-    print("%s %d" % ("number of classes:".ljust(25), np.unique(y_train).size))
-    print("%s %s" % ("data type:".ljust(25), X_train.dtype))
-    print("%s %d (pos=%d, neg=%d, size=%dMB)"
-          % ("number of train samples:".ljust(25),
-             X_train.shape[0], np.sum(y_train == 1),
-             np.sum(y_train == 0), int(X_train.nbytes / 1e6)))
-    print("%s %d (pos=%d, neg=%d, size=%dMB)"
-          % ("number of test samples:".ljust(25),
-             X_test.shape[0], np.sum(y_test == 1),
-             np.sum(y_test == 0), int(X_test.nbytes / 1e6)))
 
     error, train_time = {}, {}
     for backend, backend_kwargs in BACKENDS:

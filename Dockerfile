@@ -63,7 +63,7 @@ ENV BASICUSER basicuser
 ENV BASICUSER_UID 1000
 RUN useradd -m -d /work -s /bin/bash -N -u $BASICUSER_UID $BASICUSER
 
-COPY --from=builder --chown=basicuser:basicuser ./work work
+COPY --from=builder --chown=basicuser:users ./work work
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
