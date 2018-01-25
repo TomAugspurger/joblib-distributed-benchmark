@@ -64,10 +64,17 @@ ENV BASICUSER_UID 1000
 RUN useradd -m -d /work -s /bin/bash -N -u $BASICUSER_UID $BASICUSER
 
 COPY --from=builder --chown=basicuser:users ./work work
+COPY --from=builder --chown=basicuser:users ./scikit-learn work/scikit-learn
+COPY --from=builder --chown=basicuser:users ./joblib work/joblib
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 ENV PATH="/work/bin:/work/miniconda/bin:$PATH"
+
+RUN cd work/joblib && pip install -e . && cd .. \
+ && cd scikit-learn && pip install -e . \
+ && cd sklearn/externals \
+ && ./copy_joblib.sh ../../../joblib
 
 # Install Tini that necessary to properly run the notebook service in docker
 # http://jupyter-notebook.readthedocs.org/en/latest/public_server.html#docker-cmd
