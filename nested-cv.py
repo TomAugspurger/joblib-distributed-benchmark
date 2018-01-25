@@ -88,13 +88,13 @@ if __name__ == '__main__':
     for backend, backend_kwargs in BACKENDS:
         for n_jobs_outer in n_jobs_grid:
             for n_jobs_inner in n_jobs_grid:
-                clf = RandomForestClassifier(random_state=RANDOM_STATE,
-                                             n_estimators=20)
+                clf = RandomForestClassifier(random_state=RANDOM_STATE, n_estimators=10, n_jobs=-1)
                 param_grid = {
-                    'max_features': [5, 25, 54],
-                    'min_samples_split': [2, 5, 10],
+                    'max_features': [5, 54],
+                    'min_samples_split': [2, 5],
                 }
-                gs = GridSearchCV(clf, param_grid, cv=5, n_jobs=n_jobs_inner, verbose=1)
+                gs = GridSearchCV(clf, param_grid, cv=5, n_jobs=n_jobs_inner,
+                                  verbose=1)
                 name = '%s,%s,%s' % (backend, n_jobs_outer, n_jobs_inner)
 
                 print("Training with {}...".format(name), end="")
