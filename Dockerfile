@@ -20,15 +20,16 @@ COPY config /work/config
 ADD https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh miniconda.sh
 
 # Install pydata stack
-RUN bash miniconda.sh -b -p /work/miniconda && rm miniconda.sh
-RUN conda config --set always_yes yes --set changeps1 no --set auto_update_conda no
-RUN conda install notebook psutil numpy pandas pip \
+RUN bash miniconda.sh -b -p /work/miniconda && rm miniconda.sh \
+ && conda config --set always_yes yes --set changeps1 no --set auto_update_conda no \
+ && conda install notebook psutil numpy pandas pip \
                   scikit-image nomkl lz4 tornado \
  && conda install -c conda-forge fastparquet s3fs zict python-blosc cytoolz dask \
-                                 distributed dask-searchcv gcsfs \
+                                 distributed dask-searchcv gcsfs nodejs jupyterlab \
  && conda install -c bokeh bokeh \
- && conda clean -tipsy
-RUN pip install graphviz \
+ && jupyter labextension install @jupyter-widgets/jupyterlab-manager \
+ && conda clean -tipsy \
+ && pip install graphviz \
  && pip install git+https://github.com/dask/dask --upgrade --no-deps \
  && pip install git+https://github.com/dask/distributed --upgrade --no-deps
 
@@ -43,12 +44,10 @@ RUN git clone https://github.com/TomAugspurger/scikit-learn -b joblib-hints \
  && cd sklearn/externals \
  && ./copy_joblib.sh ../../../joblib
 
-RUN conda install -c conda-forge nodejs jupyterlab \
- && jupyter labextension install @jupyter-widgets/jupyterlab-manager
 RUN conda clean -tipsy
 
 FROM ubuntu:16.04
-COPY --from=builder /work .
+COPY --from=builder /work ./work
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8

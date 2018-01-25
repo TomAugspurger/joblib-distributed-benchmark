@@ -21,6 +21,8 @@ def parse_args(args=None):
     parser.add_argument('-s', '--scheduler-address',
                         help='Address for the scheduler like "tcp://...:8786"')
     parser.add_argument('-b', '--benchmark', choices=['basic', 'nested'])
+    parser.add_argument('-n', '--classifier-n-jobs', type=int,
+                        help='Number of cores to use for the classifier (nested)')
 
     for backend in ['threading', 'dask', 'loky']:
         parser.add_argument(f'--{backend}', dest=backend, action='store_true')
@@ -152,7 +154,8 @@ def build_backends(backends, scheduler_host, X_train, y_train):
     return BACKENDS
 
 
-def nested(scheduler_address, backends):
+def nested(scheduler_address, backends,
+           classifier_n_jobs=-1):
     X_train, X_test, y_train, y_test = load_data()
     BACKENDS = build_backends(backends, scheduler_address, X_train, y_train)
     n_jobs_grid = [-1, 1]
@@ -177,7 +180,7 @@ def nested(scheduler_address, backends):
             for n_jobs_inner in n_jobs_grid:
                 clf = RandomForestClassifier(random_state=RANDOM_STATE,
                                              n_estimators=10,
-                                             n_jobs=-1)
+                                             n_jobs=classifier_n_jobs)
                 param_grid = {
                     'max_features': [4, 8, 12],
                     'min_samples_split': [2, 5],
