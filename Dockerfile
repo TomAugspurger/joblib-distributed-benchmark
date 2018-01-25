@@ -22,18 +22,29 @@ ADD https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh minico
 # Install pydata stack
 RUN bash miniconda.sh -b -p /work/miniconda && rm miniconda.sh \
  && conda config --set always_yes yes --set changeps1 no --set auto_update_conda no \
- && conda install notebook psutil numpy pandas pip \
-                  scikit-image nomkl lz4 tornado \
- && conda install -c conda-forge fastparquet s3fs zict python-blosc cytoolz dask \
-                                 distributed dask-searchcv gcsfs nodejs jupyterlab \
- && conda install -c bokeh bokeh \
- && jupyter labextension install @jupyter-widgets/jupyterlab-manager \
- && conda clean -tipsy \
- && pip install graphviz \
- && pip install git+https://github.com/dask/dask --upgrade --no-deps \
- && pip install git+https://github.com/dask/distributed --upgrade --no-deps
+ && conda install -c conda-forge \
+    notebook \
+    psutil \
+    numpy \
+    pandas \
+    pip \
+    nomkl \
+    lz4 \
+    tornado \
+    python-blosc \
+    cytoolz \
+    dask \
+    distributed \
+    jupyterlab \
+    bokeh \
+    nodejs \
+    Cython \
+    && conda clean -tipsy
+RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
+RUN pip install git+https://github.com/dask/dask --upgrade --no-deps
+RUN pip install git+https://github.com/dask/distributed --upgrade --no-deps
 
-RUN git clone https://github.com/ogrisel/joblib -b backend-hints \
+RUN git clone https://github.com/TomAugspurger/joblib -b ogrisel-dev-shm-size \
  && cd joblib \
  && pip install -e .
 
@@ -47,7 +58,12 @@ RUN git clone https://github.com/TomAugspurger/scikit-learn -b joblib-hints \
 RUN conda clean -tipsy
 
 FROM ubuntu:16.04
-COPY --from=builder /work ./work
+
+ENV BASICUSER basicuser
+ENV BASICUSER_UID 1000
+RUN useradd -m -d /work -s /bin/bash -N -u $BASICUSER_UID $BASICUSER
+
+COPY --from=builder --chown=basicuser:basicuser ./work work
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
@@ -58,6 +74,7 @@ ENV PATH="/work/bin:/work/miniconda/bin:$PATH"
 ENV TINI_VERSION v0.9.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 # for further interaction with kubernetes
+
 ADD https://storage.googleapis.com/kubernetes-release/release/v1.5.4/bin/linux/amd64/kubectl /usr/sbin/kubectl
 RUN chmod +x /usr/bin/tini && chmod 0500 /usr/sbin/kubectl
 
